@@ -17,7 +17,8 @@
 - PostgreSQL 17; EF Core 10 (Npgsql). Sürüm yükseltmesi ADR gerektirir.
 
 ## Naming
-- C#: tipler/metotlar `PascalCase`, parametre/yerel `camelCase`, arayüzler `I` önekli; dosya adı = tip adı.
+- C#: tipler/metotlar `PascalCase`, parametre/yerel `camelCase`, **özel alanlar `_camelCase`**,
+  arayüzler `I` önekli; dosya adı = tip adı. (Adlandırma `.editorconfig` ile zorunlu.)
 - Kullanım senaryoları: `<Fiil><Nesne>Command` / `<Nesne>Query` + `Handler` (`EnrollParticipantCommand`).
 - Veritabanı: tablo ve kolonlar `snake_case`, tablo adları çoğul (`enrollments`), FK `<tablo>_id`.
 - Angular: dosyalar `kebab-case`, sınıflar `PascalCase`, feature klasörü modül adıyla aynı
@@ -38,8 +39,10 @@ Tek geçerli desen: **Result + ProblemDetails**.
   yenileme, `403` → yetki mesajı. Bileşenler ham HTTP hatası işlemez.
 - HTTP durum eşlemesi: doğrulama hatası `400`, kimliksiz `401`, yetkisiz `403`, bulunamadı `404`,
   **iş kuralı ihlali `409 Conflict`** (`ProblemDetails.type` ilgili BR numarasını taşır),
-  beklenmeyen hata `500`. Dikkat: BR-1 bir hata değildir — kontenjan dolu oturuma yapılan kayıt
-  `Waitlisted` olarak **başarıyla** oluşur (`201`), hata yolu değildir.
+  **bağımlılığa (veritabanı vb.) ulaşılamıyor `503`**, beklenmeyen hata `500`. `500` yalnızca
+  programlama hatasına ayrılmıştır: erişilemeyen bir bağımlılık `500` değil `503` döner.
+- Dikkat: BR-1 bir hata değildir — kontenjan dolu oturuma yapılan kayıt `Waitlisted` olarak
+  **başarıyla** oluşur (`201`), hata yolu değildir.
 
 ## Data rules
 - Tüm zamanlar **UTC**: PostgreSQL `timestamptz`, .NET `DateTimeOffset`. Yerel saate yalnızca

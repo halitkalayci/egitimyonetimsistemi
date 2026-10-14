@@ -6,3 +6,15 @@ scripts/* text eol=lf
 *.md text
 *.yml text
 *.json text
+
+# .NET kaynak ve proje dosyaları LF: .editorconfig end_of_line=lf ile uyumlu olmalı, aksi halde
+# Windows klonunda CRLF oluşur ve `dotnet format --verify-no-changes` adımı kırmızıya düşer
+# (plan 0001, R-07 onayı 2026-10-14).
+*.cs text eol=lf
+*.csproj text eol=lf
+*.props text eol=lf
+*.slnx text eol=lf
+*.editorconfig text eol=lf
+*.ts text eol=lf
+*.html text eol=lf
+*.css text eol=lf

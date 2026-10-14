@@ -14,3 +14,10 @@ Thumbs.db
 
 # Claude Code personal settings (shared settings.json IS committed after init)
 .claude/settings.local.json
+
+# .NET / Node build artefacts
+bin/
+obj/
+node_modules/
+web/dist/
+.angular/

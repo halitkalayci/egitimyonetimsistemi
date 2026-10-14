@@ -1,0 +1,41 @@
+<main class="page">
+  <h1>Eğitim Yönetim Sistemi</h1>
+
+  <!-- Bekleme ve hata bildirimleri ekran okuyucuya duyurulur (spec 0001, AC-8). -->
+  <div class="status" role="status" aria-live="polite">
+    @if (state() === 'loading') {
+      <p data-testid="loading">Yükleniyor…</p>
+    }
+  </div>
+
+  @if (state() === 'ready' && info(); as data) {
+    <section data-testid="content">
+      <dl class="facts">
+        <dt>Uygulama</dt>
+        <dd data-testid="application-name">{{ data.applicationName }}</dd>
+        <dt>Veritabanı saati (UTC)</dt>
+        <dd data-testid="database-time">{{ data.databaseTimeUtc }}</dd>
+      </dl>
+
+      @if (isEmpty()) {
+        <p data-testid="empty">Gösterilecek kayıt yok.</p>
+      } @else {
+        <ul data-testid="entries">
+          @for (entry of data.entries; track entry.id) {
+            <li>
+              <span class="entry-key">{{ entry.key }}</span>
+              <span class="entry-value">{{ entry.value }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+
+  @if (state() === 'error') {
+    <section class="error" role="alert" data-testid="error">
+      <p data-testid="error-message">{{ errorMessage() }}</p>
+      <button type="button" data-testid="retry" (click)="load()">Yeniden dene</button>
+    </section>
+  }
+</main>

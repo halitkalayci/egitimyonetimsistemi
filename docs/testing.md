@@ -12,8 +12,14 @@
   SQLite kullanılmaz — `timestamptz`, `numeric`, kısıtlar ve migration davranışını taklit
   etmedikleri için yanıltıcı yeşil üretirler. Konteyner koşu sonunda durdurulur (Resource hygiene).
 - **Mimari testler:** NetArchTest — `tests/Architecture.Tests`.
-- **Frontend birim:** `ng test --watch=false` (CI'da headless, tek işçi).
+- **Frontend birim:** `ng test --watch=false` — Angular 21'de koşucu **vitest + jsdom**; tarayıcı
+  açılmadığı için koşudan sonra süreç kalmaz.
 - **E2E:** Playwright, `--workers=1`, headless; yalnızca 3–5 kritik akış.
+- **Backend testleri `dotnet test` ile DEĞİL, doğrudan koşturulur:** `dotnet run --project
+  tests/<Proje>` (ve `./scripts/check` bunu yapar). Sebebi: .NET 10 SDK + xunit.v3 4.x köprüsü
+  testleri keşfetmiyor ("Zero tests ran") — aynı uygulama tek başına testleri bulup koşuyor.
+  Microsoft.Testing.Platform sıfır test durumunda `exit 5` verir; bu, "sessizce 0 test koştu"
+  tuzağına karşı korumayı araç tarafında sağlar.
 - **Yerleşim:** `tests/<Katman veya Modül>.Tests/` (örn. `tests/Domain.Tests`,
   `tests/Application.Tests`, `tests/Api.IntegrationTests`, `tests/Architecture.Tests`);
   Angular testleri kaynak dosyanın yanında `*.spec.ts`; E2E `e2e/` altında.

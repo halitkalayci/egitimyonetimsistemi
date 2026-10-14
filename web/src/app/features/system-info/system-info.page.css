@@ -1,0 +1,44 @@
+/* Renkler styles.css'teki token'lardan gelir; kontrast oranları orada belgelenmiştir (AC-8). */
+.page {
+  margin: 0 auto;
+  max-width: 48rem;
+  padding: 2rem 1rem;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 1rem;
+}
+
+.facts dt {
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.error {
+  background: var(--color-error-surface);
+  border-left: 4px solid var(--color-error);
+  padding: 1rem;
+}
+
+.error button {
+  background: var(--color-error);
+  border: 0;
+  border-radius: 0.25rem;
+  color: var(--color-on-error);
+  cursor: pointer;
+  font: inherit;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+}
+
+.error button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.entry-key {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}

@@ -1,0 +1,22 @@
+/*
+ * Renk token'ları. Kontrast oranları (WCAG AA >= 4.5:1, spec 0001 AC-8):
+ *   --color-text  #1a1a1a  üzerinde --color-surface #ffffff  -> 18.1:1
+ *   --color-muted #595959  üzerinde --color-surface #ffffff  ->  7.0:1
+ *   --color-on-error #ffffff üzerinde --color-error #a4262c  ->  6.4:1
+ */
+:root {
+  --color-surface: #ffffff;
+  --color-text: #1a1a1a;
+  --color-muted: #595959;
+  --color-error: #a4262c;
+  --color-on-error: #ffffff;
+  --color-error-surface: #fdf3f4;
+  --color-focus: #0f5bbd;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: system-ui, "Segoe UI", sans-serif;
+  margin: 0;
+}

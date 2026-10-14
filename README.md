@@ -208,3 +208,29 @@ mastery of it.
 ## License
 
 MIT
+
+## Çalıştırma (yerel geliştirme)
+
+Gereken araçlar: .NET SDK 10 (`global.json` sürümü sabitler), Node 24 LTS, Docker.
+
+```sh
+# 1. Yapılandırma: örnek dosyayı kopyalayıp şifreyi ve bağlantı dizesini doldur (.env commit'lenmez)
+cp .env.example .env
+
+# 2. Veritabanı (PostgreSQL 17)
+docker compose up -d db
+
+# 3. API — http://localhost:5080 (Development'ta migration'ları kendisi uygular ve bir satır tohumlar)
+#    Bağlantı dizesi ortam değişkeninden okunur; .env'deki değeri kabuğa aktar:
+export $(grep -v '^#' .env | grep ConnectionStrings__Database | xargs)
+dotnet run --project src/Api
+
+# 4. İstemci — http://localhost:4200 (/api istekleri dev-server proxy ile API'ye gider)
+cd web && npm install && npm start
+```
+
+Doğrulama tek komuttur: `./scripts/check` (derleme · biçim · testler · istemci lint/test/derleme).
+Veritabanını durdurmak: `docker compose down` · verileri de silmek: `docker compose down -v`.
+
+Üretim dağıtımı bu sürümün kapsamı dışındadır; migration'lar üretimde elle/dağıtım adımı olarak
+uygulanır (ADR ve ayrı bir spec konusu).

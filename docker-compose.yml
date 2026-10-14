@@ -1,0 +1,22 @@
+# Yerel geliştirme veritabanı. Üretim dağıtımı bu spec'in kapsamı dışında (spec 0001).
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: egitim-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-egitimyonetim}
+      POSTGRES_USER: ${POSTGRES_USER:-egitim}
+      # Sır yok: değer .env dosyasından gelir (.env.example'a bakın), depoda saklanmaz.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD gerekli - .env dosyanizi olusturun}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-egitim} -d ${POSTGRES_DB:-egitimyonetim}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  db-data:

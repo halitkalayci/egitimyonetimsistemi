@@ -17,12 +17,46 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # The bootstrap workflow may add toolchain setup steps here (e.g. setup-java, setup-node)
-      # to match the commands it writes into scripts/check.conf.
+      # Toolchain setup matches the commands in scripts/check.conf (bootstrap, ADR-0009).
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
       - name: Verification contract
         run: |
           if [ -f scripts/check.conf ]; then
             ./scripts/check
           else
             echo "scripts/check.conf not present yet (pre-bootstrap) — skipping."
+          fi
+
+  # Vulnerability scanning is deliberately OUTSIDE scripts/check: it needs the network, which would
+  # make check non-deterministic and offline-hostile (docs/security.md, Dependencies).
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Vulnerable NuGet packages
+        run: |
+          if ls *.sln >/dev/null 2>&1 || ls **/*.csproj >/dev/null 2>&1; then
+            dotnet restore
+            dotnet list package --vulnerable --include-transitive 2>&1 | tee /tmp/nuget-vuln.txt
+            grep -q "has the following vulnerable packages" /tmp/nuget-vuln.txt && exit 1 || true
+          else
+            echo "no .NET project yet — skipping."
+          fi
+      - name: Vulnerable npm packages
+        run: |
+          if [ -f web/package.json ]; then
+            cd web && npm ci --no-fund --no-audit && npm audit --omit=dev
+          else
+            echo "no web/ workspace yet — skipping."
           fi

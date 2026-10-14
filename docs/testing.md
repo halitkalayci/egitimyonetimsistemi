@@ -1,18 +1,42 @@
 # Testing
 
-> **Template — filled during bootstrap.**
-
 ## The contract
 - Every acceptance criterion maps to at least one test (criterion ↔ test map lives in the plan).
 - Tests assert **behavior**, not implementation details or mere status codes.
 - The whole suite runs inside `scripts/check` — one command, everywhere.
 
 ## Frameworks & layout
-<!-- Test framework(s), where tests live, naming pattern. -->
+- **Backend birim/entegrasyon:** xUnit v3 + Shouldly (assertion) + NSubstitute (test double).
+  FluentAssertions kullanılmaz (v8+ ticari lisans).
+- **Entegrasyon veritabanı:** Testcontainers ile **gerçek PostgreSQL** konteyneri. EF InMemory ve
+  SQLite kullanılmaz — `timestamptz`, `numeric`, kısıtlar ve migration davranışını taklit
+  etmedikleri için yanıltıcı yeşil üretirler. Konteyner koşu sonunda durdurulur (Resource hygiene).
+- **Mimari testler:** NetArchTest — `tests/Architecture.Tests`.
+- **Frontend birim:** `ng test --watch=false` (CI'da headless, tek işçi).
+- **E2E:** Playwright, `--workers=1`, headless; yalnızca 3–5 kritik akış.
+- **Yerleşim:** `tests/<Katman veya Modül>.Tests/` (örn. `tests/Domain.Tests`,
+  `tests/Application.Tests`, `tests/Api.IntegrationTests`, `tests/Architecture.Tests`);
+  Angular testleri kaynak dosyanın yanında `*.spec.ts`; E2E `e2e/` altında.
+- **Adlandırma:** `MethodOrBehavior_ShouldExpected_WhenCondition`; iş kuralı testleri adında ilgili
+  `BR_n` geçer (`Enroll_ShouldWaitlist_WhenCapacityFull_BR_1`) — kriter ↔ test eşlemesi böyle okunur.
+- **Kapsam (coverage) yüzdesi hedefi yoktur:** yüzde yeşil olurken davranış kırık kalabilir.
+  Ölçüt, aşağıdaki listenin tamamının karşılanmasıdır.
 
 ## What must be tested
-<!-- e.g. every business rule (BR-n), every boundary/forbidden dependency, critical flows E2E/smoke. -->
-
+- **Her iş kuralı (BR-1…BR-8)** en az bir testle, tercihen `Domain` veya `Application` seviyesinde.
+- **Katılım eşiği sınırı** (BR-4): eşiğin bir altı sertifika üretmez, tam eşik üretir — sınır değeri
+  testi zorunlu (varsayılan %70, sertifikasyon tanımından okunur).
+- **Her domain invariant'ı** (`docs/domain.md`, Key domain invariants) — özellikle kontenjan sınırı
+  eşzamanlı kayıt altında (BR-1) ve sertifika numarasının değişmezliği (BR-5).
+- **Her yasak bağımlılık** (`docs/architecture.md` 1–5) mimari testle / ESLint kuralıyla.
+- **Yetkilendirme:** her uç nokta için kimliksiz erişim reddi; üye firma temsilcisinin başka
+  firmanın verisine erişememesi (negatif test zorunlu) — `docs/security.md`, AuthN / AuthZ.
+- **Kalıcılık:** EF eşlemeleri ve migration'lar gerçek PostgreSQL üzerinde; `timestamptz` ile UTC
+  dönüşümü, `numeric` hassasiyeti, tekillik kısıtları.
+- **Hata sözleşmesi:** iş kuralı ihlalinin `ProblemDetails` olarak döndüğü ve iç detay (stack trace,
+  SQL, başka kullanıcının verisinin varlığı) sızdırmadığı.
+- **Kritik akışlar (E2E):** (1) oturum oluştur → katılımcı kaydet → kontenjan dolunca bekleme
+  listesi, (2) katılım işle → sertifika üret → doğrula, (3) sertifika iptali ve yenileme uyarısı.
 ## Protected-tests rule
 Weakening asserts, deleting, or skipping tests to reach green is forbidden. A red test triggers
 `prompts/recovery/red-test.md` (R-02) — first decide what is wrong: code, test, or spec.

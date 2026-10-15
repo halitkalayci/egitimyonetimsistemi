@@ -1,0 +1,180 @@
+<main class="page">
+  <h1>Kullanıcılar</h1>
+
+  @if (state() === 'forbidden') {
+    <p class="error" role="alert" data-testid="forbidden">
+      Bu sayfayı görüntüleme yetkiniz yok.
+    </p>
+  } @else {
+    <section class="new-user">
+      <h2>Yeni kullanıcı</h2>
+      <form (ngSubmit)="create()" novalidate>
+        <div class="field">
+          <label for="fullName">Ad soyad</label>
+          <input
+            id="fullName"
+            name="fullName"
+            required
+            [ngModel]="fullName()"
+            (ngModelChange)="fullName.set($event)"
+            data-testid="new-full-name"
+          />
+        </div>
+        <div class="field">
+          <label for="newEmail">E-posta</label>
+          <input
+            id="newEmail"
+            name="newEmail"
+            type="email"
+            required
+            [ngModel]="email()"
+            (ngModelChange)="email.set($event)"
+            data-testid="new-email"
+          />
+        </div>
+        <div class="field">
+          <label for="newRole">Rol</label>
+          <select
+            id="newRole"
+            name="newRole"
+            [ngModel]="role()"
+            (ngModelChange)="role.set($event)"
+            data-testid="new-role"
+          >
+            @for (option of assignableRoles(); track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+        </div>
+        @if (showFirmField()) {
+          <div class="field">
+            <label for="newFirm">Üye firma kimliği</label>
+            <input
+              id="newFirm"
+              name="newFirm"
+              [attr.aria-describedby]="memberFirmError() ? 'newFirmHint newFirmError' : 'newFirmHint'"
+              [attr.aria-invalid]="memberFirmError() ? 'true' : null"
+              [ngModel]="memberFirmId()"
+              (ngModelChange)="setMemberFirmId($event)"
+              data-testid="new-firm"
+            />
+            <small id="newFirmHint">Kurum personeli olan katılımcılar için boş bırakın.</small>
+            @if (memberFirmError()) {
+              <p id="newFirmError" class="error" role="alert" data-testid="new-firm-error">
+                {{ memberFirmError() }}
+              </p>
+            }
+          </div>
+        }
+        <button type="submit" [disabled]="busy()" data-testid="create">Kullanıcı oluştur</button>
+      </form>
+
+      @if (created(); as result) {
+        <div class="temporary" role="status" aria-live="polite" data-testid="temporary-password">
+          <p>
+            <strong>{{ result.user.email }}</strong> için geçici şifre:
+            <code data-testid="temporary-password-value">{{ result.temporaryPassword }}</code>
+          </p>
+          <p class="warning">Bu şifre bir daha gösterilmeyecek. Kullanıcıya güvenli bir kanalla iletin.</p>
+          <button type="button" (click)="dismissTemporaryPassword()" data-testid="dismiss">Anladım</button>
+        </div>
+      }
+    </section>
+
+    @if (statusMessage()) {
+      <p class="status" role="status" aria-live="polite" data-testid="action-status">
+        {{ statusMessage() }}
+      </p>
+    }
+
+    @if (errorMessage() && state() !== 'error') {
+      <p class="error" role="alert" data-testid="form-error">{{ errorMessage() }}</p>
+    }
+
+    @switch (state()) {
+      @case ('loading') {
+        <p class="status" role="status" aria-live="polite" data-testid="loading">Yükleniyor…</p>
+      }
+      @case ('error') {
+        <section class="error" role="alert" data-testid="error">
+          <p>{{ errorMessage() }}</p>
+          <button type="button" (click)="load()" data-testid="retry">Yeniden dene</button>
+        </section>
+      }
+      @default {
+        @if (isEmpty()) {
+          <p data-testid="empty">Henüz kullanıcı yok.</p>
+        } @else {
+          <table data-testid="users">
+            <caption>Sistemde kayıtlı kullanıcılar</caption>
+            <thead>
+              <tr>
+                <th scope="col">Ad soyad</th>
+                <th scope="col">E-posta</th>
+                <th scope="col">Rol</th>
+                <th scope="col">Durum</th>
+                <th scope="col">İşlemler</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of users(); track user.id) {
+                <tr [attr.data-testid]="'row-' + user.id">
+                  <td>{{ user.fullName }}</td>
+                  <td>{{ user.email }}</td>
+                  <td>{{ user.role }}</td>
+                  <td>{{ user.isDisabled ? 'Devre dışı' : 'Aktif' }}</td>
+                  <td class="actions">
+                    @if (canManage(user)) {
+                      <label class="visually-hidden" [for]="'role-' + user.id">
+                        {{ user.fullName }} için yeni rol
+                      </label>
+                      <select #roleSelect [id]="'role-' + user.id" data-testid="row-role">
+                        @for (option of assignableRoles(); track option) {
+                          <option [value]="option" [selected]="option === user.role">{{ option }}</option>
+                        }
+                      </select>
+                      <button
+                        type="button"
+                        [disabled]="busy()"
+                        (click)="changeRole(user, roleSelect.value)"
+                        [attr.aria-label]="user.fullName + ' için rolü değiştir'"
+                        data-testid="row-change-role"
+                      >
+                        Rolü değiştir
+                      </button>
+                      <button
+                        type="button"
+                        [disabled]="busy()"
+                        (click)="resetPassword(user)"
+                        [attr.aria-label]="user.fullName + ' için şifre sıfırla'"
+                        data-testid="row-reset-password"
+                      >
+                        Şifre sıfırla
+                      </button>
+                      <button
+                        type="button"
+                        [disabled]="busy()"
+                        (click)="toggleStatus(user)"
+                        [attr.aria-label]="
+                          user.fullName + (user.isDisabled ? ' hesabını yeniden aç' : ' hesabını devre dışı bırak')
+                        "
+                        data-testid="row-toggle-status"
+                      >
+                        {{ user.isDisabled ? 'Yeniden aç' : 'Devre dışı bırak' }}
+                      </button>
+                    } @else {
+                      <span data-testid="row-no-actions">
+                        <span aria-hidden="true">—</span>
+                        <span class="visually-hidden">Bu hesapta işlem yapamazsınız.</span>
+                      </span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      }
+    }
+  }
+</main>

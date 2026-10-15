@@ -33,6 +33,7 @@ public static class ResultToProblemDetails
             ErrorType.Forbidden => StatusCodes.Status403Forbidden,
             ErrorType.NotFound => StatusCodes.Status404NotFound,
             ErrorType.BusinessRule => StatusCodes.Status409Conflict,
+            ErrorType.TooManyRequests => StatusCodes.Status429TooManyRequests,
             ErrorType.Unavailable => StatusCodes.Status503ServiceUnavailable,
             _ => StatusCodes.Status500InternalServerError
         };
@@ -58,6 +59,7 @@ public static class ResultToProblemDetails
         ErrorType.Forbidden => "Yetkiniz yok",
         ErrorType.NotFound => "Kayıt bulunamadı",
         ErrorType.BusinessRule => "İşlem kurallara aykırı",
+        ErrorType.TooManyRequests => "Çok fazla deneme yapıldı",
         ErrorType.Unavailable => "Servis şu anda kullanılamıyor",
         _ => "Beklenmeyen bir hata oluştu"
     };

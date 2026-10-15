@@ -1,0 +1,58 @@
+<main class="page">
+  <h1>Eğitim Yönetim Sistemi</h1>
+  <p class="lead">Devam etmek için giriş yapın.</p>
+
+  <form (ngSubmit)="submit()" novalidate>
+    <div class="field">
+      <label for="email">E-posta</label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        autocomplete="username"
+        required
+        [ngModel]="email()"
+        (ngModelChange)="email.set($event)"
+        data-testid="email"
+      />
+    </div>
+
+    <div class="field">
+      <label for="password">Şifre</label>
+      <div class="password-row">
+        <input
+          id="password"
+          name="password"
+          [type]="passwordVisible() ? 'text' : 'password'"
+          autocomplete="current-password"
+          required
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          data-testid="password"
+        />
+        <button
+          type="button"
+          class="toggle"
+          [attr.aria-pressed]="passwordVisible()"
+          [attr.aria-label]="passwordVisible() ? 'Şifreyi gizle' : 'Şifreyi göster'"
+          (click)="togglePasswordVisibility()"
+          data-testid="toggle-password"
+        >
+          {{ passwordVisible() ? 'Gizle' : 'Göster' }}
+        </button>
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="error" role="alert" data-testid="error">{{ errorMessage() }}</p>
+    }
+
+    <button type="submit" [disabled]="busy()" data-testid="submit">
+      {{ busy() ? 'Giriş yapılıyor…' : 'Giriş yap' }}
+    </button>
+
+    @if (busy()) {
+      <p class="status" role="status" aria-live="polite" data-testid="loading">Giriş yapılıyor…</p>
+    }
+  </form>
+</main>

@@ -1,3 +1,4 @@
+using Domain.People;
 using Domain.System;
 
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,10 @@ public sealed class AppDbContext : DbContext
     }
 
     public DbSet<SystemInfoEntry> SystemInfoEntries => Set<SystemInfoEntry>();
+
+    public DbSet<Participant> Participants => Set<Participant>();
+
+    public DbSet<RefreshChain> RefreshChains => Set<RefreshChain>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

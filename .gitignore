@@ -3,6 +3,11 @@
 Thumbs.db
 .idea/
 *.swp
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
 
 # Secrets — never commit these
 .env
@@ -15,9 +20,39 @@ Thumbs.db
 # Claude Code personal settings (shared settings.json IS committed after init)
 .claude/settings.local.json
 
-# .NET / Node build artefacts
+# --- .NET build output -------------------------------------------------------
 bin/
 obj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+project.lock.json
+project.fragment.lock.json
+*.nupkg
+*.snupkg
+
+# Compiled binaries anywhere in the tree, not only under bin/ or obj/: a stray copy
+# (a manual build, a tool dropping output next to a project) must not reach the repository.
+*.dll
+*.exe
+*.pdb
+*.so
+*.dylib
+*.cache
+*.tlog
+*.ilk
+
+# Test and coverage output
+[Tt]est[Rr]esults/
+coverage/
+*.coverage
+*.coverlet.json
+*.trx
+
+# --- Node / Angular ----------------------------------------------------------
 node_modules/
 web/dist/
 .angular/
+npm-debug.log*
+.eslintcache
+*.tsbuildinfo

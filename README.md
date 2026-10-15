@@ -232,5 +232,24 @@ cd web && npm install && npm start
 Doğrulama tek komuttur: `./scripts/check` (derleme · biçim · testler · istemci lint/test/derleme).
 Veritabanını durdurmak: `docker compose down` · verileri de silmek: `docker compose down -v`.
 
-Üretim dağıtımı bu sürümün kapsamı dışındadır; migration'lar üretimde elle/dağıtım adımı olarak
-uygulanır (ADR ve ayrı bir spec konusu).
+Geliştirmede ilk Admin hesabı için `.env`'deki `SeedAdmin__Email` / `SeedAdmin__Password` değerlerini
+de kabuğa aktarın; hesap, veritabanında hiç hesap yokken açılır ve ilk girişte şifre değişikliği ister.
+
+### Üretime kurulum (ilk kurulum ve her sürüm yükseltmesi)
+
+Üretim dağıtım hattı bu sürümün kapsamı dışındadır (ADR ve ayrı bir spec konusu). Uygulama
+Development dışında açılışta migration uygulamaz ve hesap tohumlamaz; bu iş **ayrı bir dağıtım
+adımıdır** ve uygulama sunulmaya başlamadan önce çalıştırılır:
+
+```sh
+# Ortam: ConnectionStrings__Database, Jwt__SigningKey ve (yalnızca ilk kurulumda) SeedAdmin__Email,
+# SeedAdmin__Password. Komut migration'ları uygular, hiç hesap yoksa ilk Admin'i açar ve çıkar.
+dotnet Api.dll --initialize-database
+```
+
+- İlk Admin hesabı geçici şifre bayrağıyla açılır; ilk girişte şifre değiştirilmeden hiçbir işlem
+  yapılamaz. Hesap açıldıktan sonra `SeedAdmin__*` değerlerini ortamdan kaldırın.
+- Veritabanında herhangi bir hesap varsa tohumlama hiçbir şeye dokunmaz; komut yükseltmelerde
+  güvenle tekrar çalıştırılabilir.
+- Ters vekil (reverse proxy) arkasında `ForwardedHeaders` yapılandırılmalıdır; aksi halde giriş hız
+  sınırı tüm istemcileri vekilin tek adresinden görür (`docs/security.md`).

@@ -8,3 +8,6 @@ export interface ApiError {
 
 export const GENERIC_ERROR_MESSAGE =
   'Bilgiler alınamadı. Lütfen birkaç saniye sonra tekrar deneyin.';
+
+export const CONNECTION_ERROR_MESSAGE =
+  'Sunucuya ulaşılamıyor. Bağlantınızı kontrol edip tekrar deneyin.';

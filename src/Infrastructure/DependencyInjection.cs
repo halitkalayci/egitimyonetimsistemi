@@ -1,6 +1,7 @@
 using Application.Abstractions;
 
 using Infrastructure.Persistence;
+using Infrastructure.Security;
 using Infrastructure.Time;
 
 using Microsoft.EntityFrameworkCore;
@@ -8,31 +9,68 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure;
 
+/// <summary>
+/// Everything the application needs from the outside world. The signing key has no default on
+/// purpose: a missing key must stop startup rather than let the application run with a guessable
+/// secret (spec 0002, AC-27).
+/// </summary>
+public sealed record InfrastructureOptions(
+    string ConnectionString,
+    string JwtSigningKey,
+    TimeSpan AccessTokenLifetime,
+    SeedAdminOptions? SeedAdmin);
+
 public static class DependencyInjection
 {
-    /// <summary>
-    /// Composition root for everything that touches the outside world. Api calls this and stays
-    /// free of EF Core itself (docs/architecture.md, forbidden dependency 4).
-    /// </summary>
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
+    /// <summary>Minimum length for the signing key: 256 bits, as HMAC-SHA256 expects.</summary>
+    public const int MinimumSigningKeyLength = 32;
+
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services,
+        InfrastructureOptions options)
     {
         ArgumentNullException.ThrowIfNull(services);
-        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.ConnectionString);
 
-        services.AddDbContext<AppDbContext>(options => options
-            .UseNpgsql(connectionString)
+        if (string.IsNullOrWhiteSpace(options.JwtSigningKey)
+            || options.JwtSigningKey.Length < MinimumSigningKeyLength)
+        {
+            throw new InvalidOperationException(
+                $"Jwt:SigningKey is missing or shorter than {MinimumSigningKeyLength} characters. "
+                + "Provide it through configuration (see .env.example); it is never stored in the repository.");
+        }
+
+        services.AddDbContext<AppDbContext>(dbContext => dbContext
+            .UseNpgsql(options.ConnectionString)
             .UseSnakeCaseNamingConvention());
 
         services.AddScoped<ISystemInfoRepository, SystemInfoRepository>();
         services.AddScoped<IDatabaseTimeProvider, NpgsqlDatabaseTimeProvider>();
+        services.AddScoped<IParticipantRepository, ParticipantRepository>();
+        services.AddScoped<IRefreshChainRepository, RefreshChainRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
         services.AddSingleton<IClock, SystemClock>();
+        services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
+        services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
+        services.AddSingleton<ITemporaryPasswordGenerator, TemporaryPasswordGenerator>();
+        services.AddSingleton(new JwtOptions(options.JwtSigningKey, options.AccessTokenLifetime));
+        services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
+
+        if (options.SeedAdmin is SeedAdminOptions seedAdmin)
+        {
+            services.AddSingleton(seedAdmin);
+        }
 
         return services;
     }
 
     /// <summary>
-    /// Applies pending migrations and seeds the neutral entry the skeleton reads. Development only:
-    /// production applies migrations as a deployment step (plan 0001, risk 5).
+    /// Applies pending migrations, seeds the neutral system-info row and, when configured, the
+    /// first administrator. Runs on start in Development; everywhere else it is the explicit
+    /// deployment step `--initialize-database` (README, "Üretime kurulum"), never a side effect
+    /// of serving requests (plan 0001, risk 5).
     /// </summary>
     public static async Task InitializeDatabaseAsync(
         this IServiceProvider services,
@@ -45,6 +83,15 @@ public static class DependencyInjection
 
         await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
         await SystemInfoSeed.EnsureSeededAsync(context, cancellationToken).ConfigureAwait(false);
+
+        if (scope.ServiceProvider.GetService<SeedAdminOptions>() is SeedAdminOptions seedAdmin)
+        {
+            await IdentitySeed.EnsureAdminAsync(
+                context,
+                scope.ServiceProvider.GetRequiredService<IPasswordHasher>(),
+                seedAdmin,
+                cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <summary>

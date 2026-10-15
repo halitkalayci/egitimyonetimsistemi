@@ -1,0 +1,101 @@
+.page {
+  margin: 0 auto;
+  max-width: 56rem;
+  padding: 2rem 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.field label {
+  font-weight: 600;
+}
+
+.field input,
+.field select {
+  border: 1px solid var(--color-muted);
+  border-radius: 0.25rem;
+  font: inherit;
+  padding: 0.5rem;
+}
+
+button {
+  background: var(--color-focus);
+  border: 0;
+  border-radius: 0.25rem;
+  color: var(--color-on-error);
+  cursor: pointer;
+  font: inherit;
+  padding: 0.5rem 1rem;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+table {
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--color-muted);
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.temporary {
+  background: var(--color-error-surface);
+  border-left: 4px solid var(--color-focus);
+  margin-top: 1rem;
+  padding: 0.75rem;
+}
+
+.temporary code {
+  font-size: 1.1rem;
+}
+
+.warning {
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+.error {
+  background: var(--color-error-surface);
+  border-left: 4px solid var(--color-error);
+  padding: 0.75rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.actions select {
+  border: 1px solid var(--color-muted);
+  border-radius: 0.25rem;
+  font: inherit;
+  padding: 0.25rem;
+}
+
+.status {
+  color: var(--color-text);
+}
+
+.visually-hidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}

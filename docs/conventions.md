@@ -39,7 +39,8 @@ Tek geçerli desen: **Result + ProblemDetails**.
   yenileme, `403` → yetki mesajı. Bileşenler ham HTTP hatası işlemez.
 - HTTP durum eşlemesi: doğrulama hatası `400`, kimliksiz `401`, yetkisiz `403`, bulunamadı `404`,
   **iş kuralı ihlali `409 Conflict`** (`ProblemDetails.type` ilgili BR numarasını taşır),
-  **bağımlılığa (veritabanı vb.) ulaşılamıyor `503`**, beklenmeyen hata `500`. `500` yalnızca
+  **hız sınırı aşıldı `429`**, **bağımlılığa (veritabanı vb.) ulaşılamıyor `503`**, beklenmeyen
+  hata `500`. `500` yalnızca
   programlama hatasına ayrılmıştır: erişilemeyen bir bağımlılık `500` değil `503` döner.
 - Dikkat: BR-1 bir hata değildir — kontenjan dolu oturuma yapılan kayıt `Waitlisted` olarak
   **başarıyla** oluşur (`201`), hata yolu değildir.

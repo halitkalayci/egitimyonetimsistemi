@@ -17,10 +17,96 @@ namespace Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.13")
+                .HasAnnotation("ProductVersion", "10.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Domain.People.Participant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("full_name");
+
+                    b.Property<Guid?>("MemberFirmId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("member_firm_id");
+
+                    b.Property<uint>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_participants");
+
+                    b.HasIndex("MemberFirmId")
+                        .HasDatabaseName("ix_participants_member_firm_id");
+
+                    b.ToTable("participants", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.People.RefreshChain", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("AccountSessionVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("account_session_version");
+
+                    b.Property<string>("CurrentTokenHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("current_token_hash");
+
+                    b.Property<DateTimeOffset>("ExpiresAtUtc")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("expires_at_utc");
+
+                    b.Property<Guid>("ParticipantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("participant_id");
+
+                    b.Property<DateTimeOffset?>("RevokedAtUtc")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("revoked_at_utc");
+
+                    b.PrimitiveCollection<string[]>("RotatedTokenHashes")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("rotated_token_hashes");
+
+                    b.Property<uint>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.Property<DateTimeOffset>("StartedAtUtc")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("started_at_utc");
+
+                    b.HasKey("Id")
+                        .HasName("pk_refresh_chains");
+
+                    b.HasIndex("CurrentTokenHash")
+                        .HasDatabaseName("ix_refresh_chains_current_token_hash");
+
+                    b.HasIndex("ParticipantId")
+                        .HasDatabaseName("ix_refresh_chains_participant_id");
+
+                    b.ToTable("refresh_chains", (string)null);
+                });
 
             modelBuilder.Entity("Domain.System.SystemInfoEntry", b =>
                 {
@@ -52,6 +138,78 @@ namespace Infrastructure.Migrations
                         .HasDatabaseName("ix_system_info_entries_key");
 
                     b.ToTable("system_info_entries", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.People.Participant", b =>
+                {
+                    b.OwnsOne("Domain.People.UserAccount", "Account", b1 =>
+                        {
+                            b1.Property<Guid>("ParticipantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Email")
+                                .IsRequired()
+                                .HasMaxLength(256)
+                                .HasColumnType("character varying(256)")
+                                .HasColumnName("email");
+
+                            b1.Property<int>("FailedAttempts")
+                                .HasColumnType("integer")
+                                .HasColumnName("failed_attempts");
+
+                            b1.Property<bool>("IsDisabled")
+                                .HasColumnType("boolean")
+                                .HasColumnName("is_disabled");
+
+                            b1.Property<DateTimeOffset?>("LockedUntilUtc")
+                                .HasColumnType("timestamptz")
+                                .HasColumnName("locked_until");
+
+                            b1.Property<bool>("MustChangePassword")
+                                .HasColumnType("boolean")
+                                .HasColumnName("must_change_password");
+
+                            b1.Property<string>("PasswordHash")
+                                .IsRequired()
+                                .HasMaxLength(256)
+                                .HasColumnType("character varying(256)")
+                                .HasColumnName("password_hash");
+
+                            b1.Property<string>("Role")
+                                .IsRequired()
+                                .HasMaxLength(40)
+                                .HasColumnType("character varying(40)")
+                                .HasColumnName("role");
+
+                            b1.Property<int>("SessionVersion")
+                                .HasColumnType("integer")
+                                .HasColumnName("session_version");
+
+                            b1.HasKey("ParticipantId");
+
+                            b1.HasIndex("Email")
+                                .IsUnique()
+                                .HasDatabaseName("ix_participants_email");
+
+                            b1.ToTable("participants");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ParticipantId")
+                                .HasConstraintName("fk_participants_participants_id");
+                        });
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("Domain.People.RefreshChain", b =>
+                {
+                    b.HasOne("Domain.People.Participant", null)
+                        .WithMany()
+                        .HasForeignKey("ParticipantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_refresh_chains_participants_participant_id");
                 });
 #pragma warning restore 612, 618
         }

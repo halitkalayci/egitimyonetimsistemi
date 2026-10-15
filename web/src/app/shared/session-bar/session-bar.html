@@ -1,0 +1,18 @@
+@if (store.isAuthenticated()) {
+  <header class="session-bar">
+    <nav aria-label="Oturum">
+      <button type="button" (click)="logout()" [disabled]="busy()" data-testid="logout">
+        Çıkış
+      </button>
+      <button
+        type="button"
+        class="secondary"
+        (click)="logoutAll()"
+        [disabled]="busy()"
+        data-testid="logout-all"
+      >
+        Tüm oturumları kapat
+      </button>
+    </nav>
+  </header>
+}

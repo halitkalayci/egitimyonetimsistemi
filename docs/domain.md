@@ -7,7 +7,8 @@ bağlayıcıdır: bir terim koda girerken yalnızca bu tablodaki tipe dönüşü
 | Term | Meaning | Notes / not to be confused with |
 |---|---|---|
 | Üye Firma (`MemberFirm`) | Birliğe üye tüzel kişi; çalışanları eğitimlere katılabilir | Üyeliği aktif/pasif olabilir (BR-6). Katılımcı değildir, katılımcının bağlı olduğu kurumdur |
-| Katılımcı (`Participant`) | Eğitime kaydolan kişi: kurum personeli **veya** üye firma çalışanı | "Öğrenci" demiyoruz. Kullanıcı (`User`) ile aynı şey değil: katılımcının sistem hesabı olmayabilir |
+| Katılımcı (`Participant`) | Eğitime kaydolan kişi: kurum personeli **veya** üye firma çalışanı | "Öğrenci" demiyoruz. **Tek kayıt modeli** (karar: 2026-10-14): kişi tek bir kayıt olarak yaşar, sistem hesabı bu kaydın opsiyonel parçasıdır — hesabı olmayan kişi yalnızca katılımcıdır |
+| Kullanıcı (`User`) | Sistem hesabı (e-posta + şifre) bulunan kişi ve taşıdığı rol | Ayrı bir kayıt **değil**: aynı kişi kaydının kimlik bilgileri doldurulmuş hali. Hiçbir eğitime kaydolmamış kullanıcılar (Admin, Instructor) olabilir; hesabı hiç açılmamış katılımcılar da olabilir |
 | Eğitmen (`Instructor`) | Bir oturumu veren kişi | Eğitimin değil, **oturumun** özelliğidir |
 | Eğitim (`Training`) | Tekrarlanabilir eğitim tanımı: müfredat, süre, ön koşul | Takvimdeki tek bir olay değildir. Kayıt doğrudan Eğitime yapılmaz |
 | Oturum (`Session`) | Eğitimin belirli tarih/yer/eğitmenle somut örneği; toplam süresi (saat) bellidir | Kayıt, kontenjan ve katılım **oturuma** bağlıdır |
@@ -51,3 +52,7 @@ Her BR-n en az bir testle eşleşir (`docs/testing.md`, What must be tested).
   birden fazla **geçerli** sertifikası olamaz.
 - Sertifika numarası üretildikten sonra hiçbir işlemle değişmez; iptal, numarayı serbest bırakmaz.
 - Üye firma temsilcisinin eriştiği veya oluşturduğu her kayıt kendi firmasına aittir (BR-8).
+- Kurum personeli rolleri (`Admin`, `Instructor`) hiçbir üye firmaya bağlı olmaz; bir firma
+  çalışanına bu roller, firmasından ayrılmadan atanamaz.
+- Bir kişi kaydının en fazla bir sistem hesabı vardır ve hesap e-postası sistem genelinde tekildir;
+  hesabı olmayan kişi giriş yapamaz, ama eğitimlere kaydedilebilir (tek kayıt modeli).

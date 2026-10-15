@@ -77,6 +77,16 @@ public sealed class LayerBoundaryTests
         }
     }
 
+    /// <summary>
+    /// The Role enum belongs to the Domain and must not surface at the HTTP boundary: contracts
+    /// carry the role as a string and Application converts it (plan 0002, risk 5).
+    /// </summary>
+    [Fact]
+    public void Api_ShouldNotReferenceTheDomainRoleType_Rule4()
+    {
+        AssertNoDependency(ApiAssembly, ["Domain.People"]);
+    }
+
     private static void AssertNoDependency(Assembly assembly, string[] forbiddenNamespaces)
     {
         NetArchTest.Rules.TestResult result = Types.InAssembly(assembly)
